@@ -3,9 +3,15 @@ import Link from "next/link";
 import { TopBar } from "@/components/layout/TopBar";
 import { ProjectBadge } from "@/components/shared/ProjectBadge";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { WorkflowPipeline } from "@/components/shared/WorkflowPipeline";
+import { NextStepsCard } from "@/components/shared/NextStepsCard";
 import { TicketStatusWorkflow } from "@/components/tickets/TicketStatusWorkflow";
 import { TimerControls } from "@/components/time/TimerControls";
 import { getTicket, getTimeEntries } from "@/lib/queries";
+import {
+  getWorkflowSteps,
+  getNextStepMessage,
+} from "@/lib/support/workflow";
 import {
   formatCurrency,
   formatDurationLong,
@@ -29,6 +35,8 @@ export default async function TicketDetailPage({ params }: PageProps) {
     (sum, e) => sum + (e.duration_seconds ?? 0),
     0
   );
+  const workflowSteps = getWorkflowSteps(ticket);
+  const nextStep = getNextStepMessage(ticket);
 
   return (
     <>
@@ -58,6 +66,21 @@ export default async function TicketDetailPage({ params }: PageProps) {
             </div>
             <StatusBadge status={ticket.status} />
           </div>
+
+          <div className="mb-6 rounded-lg border border-gray-100 bg-gray-50/80 p-4">
+            <WorkflowPipeline steps={workflowSteps} />
+          </div>
+
+          <NextStepsCard
+            title={nextStep.title}
+            body={nextStep.body}
+            actionLabel={nextStep.actionLabel}
+            actionHref={
+              nextStep.actionHref
+                ? `${nextStep.actionHref}?ticket=${ticket.id}`
+                : undefined
+            }
+          />
 
           {ticket.description && (
             <div className="mb-6 whitespace-pre-wrap text-sm leading-relaxed">

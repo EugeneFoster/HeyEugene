@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { RealtimeProvider } from "@/components/shared/RealtimeProvider";
+import { ConnectionBanner } from "@/components/shared/ConnectionBanner";
 import {
   getTenants,
   getDashboardStats,
@@ -44,6 +45,7 @@ export default async function RootLayout({
             unpaidInvoiceCount={stats.unpaidInvoices}
           />
           <main className="ml-60 min-h-screen">
+            <ConnectionBanner />
             {children}
           </main>
           <Toaster position="bottom-right" richColors />

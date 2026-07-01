@@ -1,6 +1,7 @@
 "use client";
 
 import { ProjectFilter } from "./ProjectFilter";
+import { NotificationBell } from "@/components/shared/NotificationBell";
 
 export function TopBar({ title }: { title?: string }) {
   return (
@@ -10,7 +11,8 @@ export function TopBar({ title }: { title?: string }) {
           {title}
         </h1>
       )}
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-3">
+        <NotificationBell />
         <ProjectFilter />
       </div>
     </header>

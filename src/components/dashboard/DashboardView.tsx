@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import type { DashboardData } from "@/lib/types";
+import type { PipelineCounts } from "@/lib/support/workflow";
 import { SummaryBar } from "./SummaryBar";
 import { ProjectCard } from "./ProjectCard";
+import { PipelineOverview } from "./PipelineOverview";
 import { useProjectFilter } from "@/lib/store/project-filter";
 
 interface DashboardViewProps {
   data: DashboardData;
   greeting: string;
+  pipeline: PipelineCounts;
 }
 
-export function DashboardView({ data, greeting }: DashboardViewProps) {
+export function DashboardView({ data, greeting, pipeline }: DashboardViewProps) {
   const { tenantId } = useProjectFilter();
 
   const projects = tenantId
@@ -52,6 +55,8 @@ export function DashboardView({ data, greeting }: DashboardViewProps) {
       <div className="mb-6">
         <SummaryBar summary={summary} />
       </div>
+
+      <PipelineOverview counts={pipeline} />
 
       <div className="space-y-4">
         {projects.map((project) => (

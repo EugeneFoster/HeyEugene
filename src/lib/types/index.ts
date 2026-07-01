@@ -3,6 +3,7 @@ export type TicketStatus =
   | "in_review"
   | "in_progress"
   | "pending_approval"
+  | "approved"
   | "done"
   | "invoiced"
   | "declined";

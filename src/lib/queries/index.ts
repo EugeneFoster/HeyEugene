@@ -311,13 +311,37 @@ export async function getNotifications(
     return attachTenants(mock, tenants).slice(0, limit);
   }
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("support_notifications")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(limit);
 
-  return attachTenants((data ?? []) as Notification[], tenants);
+  if (error) {
+    console.error("[getNotifications]", error.message);
+    return [];
+  }
+
+  return attachTenants(
+    (data ?? []).map((row) => mapNotificationRow(row as Record<string, unknown>)),
+    tenants
+  ).slice(0, limit);
+}
+
+function mapNotificationRow(row: Record<string, unknown>) {
+  return {
+    id: row.id as string,
+    tenant_id: row.tenant_id as string,
+    type: row.type as string,
+    title: row.title as string,
+    message: (row.body as string) ?? null,
+    ticket_id:
+      row.reference_type === "ticket" ? (row.reference_id as string) : null,
+    invoice_id:
+      row.reference_type === "invoice" ? (row.reference_id as string) : null,
+    read: Boolean(row.is_read),
+    created_at: row.created_at as string,
+  } as Notification;
 }
 
 export async function getTimeEntries(
