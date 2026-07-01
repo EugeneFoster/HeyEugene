@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { generateInvoiceNumber } from "@/lib/utils/invoice-number";
+import { nextInvoiceNumber, notifyAdmins } from "@/lib/support/bridge";
 
 interface LineItemInput {
   description: string;
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
   const { data: tenant } = await supabase
     .from("support_tenants")
-    .select("prefix, tax_rate")
+    .select("prefix, hourly_rate")
     .eq("id", tenant_id)
     .single();
 
@@ -49,10 +49,9 @@ export async function POST(request: Request) {
   }
 
   const subtotal = line_items.reduce((s, l) => s + Number(l.amount), 0);
-  const taxRate = Number(tenant.tax_rate ?? 0.05);
-  const tax_amount = Math.round(subtotal * taxRate * 100) / 100;
-  const total = Math.round((subtotal + tax_amount) * 100) / 100;
-  const invoice_number = await generateInvoiceNumber(tenant_id, tenant.prefix);
+  const tax = Math.round(subtotal * 0.05 * 100) / 100;
+  const total = Math.round((subtotal + tax) * 100) / 100;
+  const invoice_number = await nextInvoiceNumber(supabase, tenant_id, tenant.prefix);
   const now = new Date().toISOString();
 
   const { data: invoice, error } = await supabase
@@ -61,16 +60,11 @@ export async function POST(request: Request) {
       tenant_id,
       invoice_number,
       status: send ? "sent" : "draft",
-      subtotal,
-      tax_amount,
       total,
+      tax,
       due_date: due_date || null,
       sent_at: send ? now : null,
       notes: notes ?? null,
-      line_items: line_items.map((l, i) => ({
-        id: `line-${i}`,
-        ...l,
-      })),
     })
     .select("*")
     .single();
@@ -79,24 +73,47 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  const { error: itemsError } = await supabase.from("support_invoice_items").insert(
+    line_items.map((l) => ({
+      invoice_id: invoice.id,
+      ticket_id: l.ticket_id ?? null,
+      description: l.description,
+      hours: l.hours ?? null,
+      rate: l.rate ?? tenant.hourly_rate,
+      amount: l.amount,
+    }))
+  );
+
+  if (itemsError) {
+    await supabase.from("support_invoices").delete().eq("id", invoice.id);
+    return NextResponse.json({ error: itemsError.message }, { status: 500 });
+  }
+
   if (ticket_ids?.length) {
     await supabase
       .from("support_tickets")
-      .update({ status: "invoiced", updated_at: now })
+      .update({ status: "invoiced", invoice_id: invoice.id, updated_at: now })
       .in("id", ticket_ids)
       .eq("tenant_id", tenant_id);
   }
 
   if (send) {
-    await supabase.from("support_notifications").insert({
+    await notifyAdmins(supabase, {
       tenant_id,
       type: "invoice_sent",
-      title: "New invoice",
-      message: `Invoice ${invoice_number} for $${total.toFixed(2)} CAD — please review`,
-      invoice_id: invoice.id,
-      read: false,
+      title: `Invoice ${invoice_number} sent`,
+      body: `Total: $${total.toFixed(2)} CAD`,
+      reference_id: invoice.id,
+      reference_type: "invoice",
     });
   }
 
-  return NextResponse.json({ invoice });
+  const mapped = {
+    ...invoice,
+    subtotal: total - tax,
+    tax_amount: tax,
+    line_items,
+  };
+
+  return NextResponse.json({ invoice: mapped });
 }

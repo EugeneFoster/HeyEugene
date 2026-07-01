@@ -70,6 +70,18 @@ function buildActionItems(
     });
   }
 
+  for (const t of tickets.filter((x) => x.status === "approved")) {
+    items.push({
+      id: `ticket-approved-${t.id}`,
+      type: "ticket",
+      status: "approved",
+      statusLabel: "Approved",
+      title: t.title,
+      createdByName: t.created_by,
+      href: `/tickets/${t.id}`,
+    });
+  }
+
   for (const inv of invoices.filter((x) => x.status === "overdue")) {
     items.push({
       id: `invoice-${inv.id}`,

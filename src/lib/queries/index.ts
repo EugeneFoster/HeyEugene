@@ -158,6 +158,33 @@ export async function getTicket(id: string): Promise<Ticket | null> {
   return tickets.find((t) => t.id === id) ?? null;
 }
 
+function mapInvoiceRow(
+  row: Record<string, unknown>,
+  tenants: Tenant[]
+): Invoice & { tenant?: Tenant } {
+  const total = Number(row.total ?? 0);
+  const tax = Number(row.tax ?? row.tax_amount ?? 0);
+  const subtotal = total - tax;
+  const tenant = tenants.find((t) => t.id === row.tenant_id);
+  return {
+    id: row.id as string,
+    tenant_id: row.tenant_id as string,
+    invoice_number: row.invoice_number as string,
+    status: row.status as Invoice["status"],
+    subtotal,
+    tax_amount: tax,
+    total,
+    due_date: (row.due_date as string) ?? null,
+    sent_at: (row.sent_at as string) ?? null,
+    paid_at: (row.paid_at as string) ?? null,
+    notes: (row.notes as string) ?? null,
+    pdf_url: null,
+    line_items: [],
+    created_at: row.created_at as string,
+    tenant,
+  };
+}
+
 export async function getInvoices(
   tenantId?: string | null
 ): Promise<Invoice[]> {
@@ -226,7 +253,9 @@ export async function getInvoices(
   if (tenantId) query = query.eq("tenant_id", tenantId);
 
   const { data } = await query;
-  return attachTenants((data ?? []) as Invoice[], tenants);
+  return (data ?? []).map((row) =>
+    mapInvoiceRow(row as Record<string, unknown>, tenants)
+  );
 }
 
 export async function getNotifications(
@@ -355,11 +384,44 @@ export async function getProposals(): Promise<Proposal[]> {
   if (!supabase) return [];
 
   const { data } = await supabase
-    .from("dev_proposals")
+    .from("support_tickets")
     .select("*")
+    .eq("type", "dev_proposal")
     .order("created_at", { ascending: false });
 
-  return attachTenants((data ?? []) as Proposal[], tenants);
+  return (data ?? []).map((row) => {
+    const tenant = tenants.find((t) => t.id === row.tenant_id);
+    return {
+      id: row.id,
+      ticket_id: row.id,
+      tenant_id: row.tenant_id,
+      problem_statement: row.title,
+      proposed_solution: row.description ?? "",
+      tasks_it_solves: [],
+      expected_impact: null,
+      estimated_hours_min: row.estimated_hours_min,
+      estimated_hours_max: row.estimated_hours_max,
+      estimated_cost_min: row.estimated_cost_min,
+      estimated_cost_max: row.estimated_cost_max,
+      attachments: [],
+      created_at: row.created_at,
+      tenant,
+      ticket: {
+        id: row.id,
+        tenant_id: row.tenant_id,
+        type: "dev_proposal",
+        title: row.title,
+        description: row.description,
+        status: row.status,
+        priority: row.priority,
+        ai_estimate_min: row.estimated_cost_min,
+        ai_estimate_max: row.estimated_cost_max,
+        created_by: row.created_by,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      },
+    } as Proposal;
+  });
 }
 
 export async function getAiUsage(): Promise<AiUsage[]> {
