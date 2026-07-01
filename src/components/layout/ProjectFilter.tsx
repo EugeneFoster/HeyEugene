@@ -4,15 +4,18 @@ import { useProjectFilter } from "@/lib/store/project-filter";
 import { IconX } from "@tabler/icons-react";
 
 export function ProjectFilter() {
-  const { tenantId, tenantName, tenantEmoji, clearProject } = useProjectFilter();
+  const { tenantId, tenantName, tenantColor, clearProject } =
+    useProjectFilter();
 
   if (!tenantId) return null;
 
   return (
     <div className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm text-blue-800">
-      <span>
-        Viewing: {tenantEmoji} {tenantName}
-      </span>
+      <span
+        className="h-2.5 w-2.5 rounded-full"
+        style={{ backgroundColor: tenantColor ?? "#3b82f6" }}
+      />
+      <span>Viewing: {tenantName}</span>
       <button
         type="button"
         onClick={clearProject}

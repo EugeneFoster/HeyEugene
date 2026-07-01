@@ -103,14 +103,24 @@ export function SidebarNav({
             <li key={tenant.id}>
               <button
                 type="button"
-                onClick={() => setProject(tenant.id, tenant.name, tenant.emoji)}
+                onClick={() =>
+                  setProject(
+                    tenant.id,
+                    tenant.name,
+                    tenant.emoji,
+                    tenant.color ?? "#3b82f6"
+                  )
+                }
                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                   tenantId === tenant.id
-                    ? "bg-white/10 text-white"
+                    ? "bg-white/10 text-white border-l-2 border-white/40"
                     : "text-gray-300 hover:bg-white/5 hover:text-white"
                 }`}
               >
-                <span>{tenant.emoji}</span>
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: tenant.color ?? "#3b82f6" }}
+                />
                 <span className="truncate">{tenant.name}</span>
               </button>
             </li>

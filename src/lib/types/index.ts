@@ -23,6 +23,7 @@ export interface Tenant {
   name: string;
   prefix: string;
   emoji: string;
+  color: string;
   hourly_rate: number;
   currency: string;
   tax_rate: number;
@@ -180,4 +181,34 @@ export interface DashboardStats {
   weeklySeconds: number;
   newTickets: number;
   unpaidInvoices: number;
+}
+
+export interface DashboardActionItem {
+  id: string;
+  type: "ticket" | "invoice";
+  status: string;
+  statusLabel: string;
+  title: string;
+  createdByName?: string | null;
+  href: string;
+  pulse?: boolean;
+}
+
+export interface DashboardProject extends Tenant {
+  ticketCount: number;
+  newTicketCount: number;
+  unpaidTotal: number;
+  weeklySeconds: number;
+  actionItems: DashboardActionItem[];
+}
+
+export interface DashboardSummary {
+  totalTickets: number;
+  totalUnpaid: number;
+  totalWeeklySeconds: number;
+}
+
+export interface DashboardData {
+  projects: DashboardProject[];
+  summary: DashboardSummary;
 }

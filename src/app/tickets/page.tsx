@@ -9,12 +9,13 @@ interface PageProps {
     type?: string;
     status?: string;
     q?: string;
+    project?: string;
   }>;
 }
 
 export default async function TicketsPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  let tickets = await getTickets();
+  let tickets = await getTickets(params.project);
 
   if (params.type && params.type !== "all") {
     tickets = tickets.filter((t) => t.type === params.type);

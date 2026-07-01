@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { Tenant } from "@/lib/types";
 import { ProposalPreview } from "./ProposalPreview";
 import { formatCurrency } from "@/lib/utils/format";
@@ -16,6 +18,7 @@ export function ProposalEditor({
   initialTenantId,
   ticketId,
 }: ProposalEditorProps) {
+  const router = useRouter();
   const [tenantId, setTenantId] = useState(
     initialTenantId ?? tenants[0]?.id ?? ""
   );
@@ -27,6 +30,7 @@ export function ProposalEditor({
   const [hoursMin, setHoursMin] = useState(3);
   const [hoursMax, setHoursMax] = useState(5);
   const [preview, setPreview] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const tenant = tenants.find((t) => t.id === tenantId);
   const rate = tenant?.hourly_rate ?? 25;
@@ -43,6 +47,34 @@ export function ProposalEditor({
     estimated_cost_min: costMin,
     estimated_cost_max: costMax,
   };
+
+  async function submitToClient() {
+    if (!title.trim() || !problem.trim() || !solution.trim()) {
+      toast.error("Title, problem, and solution are required");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/proposals/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          title,
+          ...proposalData,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Submit failed");
+      toast.success("Proposal sent to client for approval");
+      router.push(`/tickets/${data.ticket_id}`);
+      router.refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Submit failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   if (preview) {
     return (
@@ -193,9 +225,11 @@ export function ProposalEditor({
         </button>
         <button
           type="button"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          disabled={submitting}
+          onClick={submitToClient}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          Submit to Client
+          {submitting ? "Sending…" : "Submit to Client"}
         </button>
       </div>
     </div>

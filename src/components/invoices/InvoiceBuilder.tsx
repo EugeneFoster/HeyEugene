@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import type { Tenant, Ticket, TimeEntry } from "@/lib/types";
 import { formatCurrency, formatDurationLong } from "@/lib/utils/format";
 
@@ -25,6 +27,7 @@ export function InvoiceBuilder({
   timeEntries,
   preselectedTicketId,
 }: InvoiceBuilderProps) {
+  const router = useRouter();
   const [tenantId, setTenantId] = useState(tenants[0]?.id ?? "");
   const tenant = tenants.find((t) => t.id === tenantId);
   const doneTickets = tickets.filter(
@@ -40,6 +43,7 @@ export function InvoiceBuilder({
   const [customLines, setCustomLines] = useState<LineItem[]>([]);
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
 
   function getTicketHours(ticketId: string) {
     const secs = timeEntries
@@ -69,6 +73,39 @@ export function InvoiceBuilder({
   const taxRate = tenant?.tax_rate ?? 0.05;
   const tax = subtotal * taxRate;
   const total = subtotal + tax;
+
+  async function saveInvoice(send: boolean) {
+    if (lineItems.length === 0) {
+      toast.error("Add at least one line item");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          line_items: lineItems,
+          due_date: dueDate || undefined,
+          notes: notes || undefined,
+          ticket_ids: lineItems
+            .filter((l) => l.ticket_id)
+            .map((l) => l.ticket_id),
+          send,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to save invoice");
+      toast.success(send ? "Invoice sent to client" : "Invoice saved as draft");
+      router.push(`/invoices/${data.invoice.id}`);
+      router.refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save invoice");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="max-w-2xl rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
@@ -162,15 +199,19 @@ export function InvoiceBuilder({
       <div className="flex gap-3">
         <button
           type="button"
-          className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+          disabled={saving}
+          onClick={() => saveInvoice(false)}
+          className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
         >
           Save Draft
         </button>
         <button
           type="button"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          disabled={saving}
+          onClick={() => saveInvoice(true)}
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          Send to Client
+          {saving ? "Sending…" : "Send to Client"}
         </button>
       </div>
     </div>

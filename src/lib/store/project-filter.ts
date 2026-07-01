@@ -7,7 +7,13 @@ interface ProjectFilterState {
   tenantId: string | null;
   tenantName: string | null;
   tenantEmoji: string | null;
-  setProject: (id: string, name: string, emoji: string) => void;
+  tenantColor: string | null;
+  setProject: (
+    id: string,
+    name: string,
+    emoji: string,
+    color: string
+  ) => void;
   clearProject: () => void;
 }
 
@@ -17,10 +23,21 @@ export const useProjectFilter = create<ProjectFilterState>()(
       tenantId: null,
       tenantName: null,
       tenantEmoji: null,
-      setProject: (id, name, emoji) =>
-        set({ tenantId: id, tenantName: name, tenantEmoji: emoji }),
+      tenantColor: null,
+      setProject: (id, name, emoji, color) =>
+        set({
+          tenantId: id,
+          tenantName: name,
+          tenantEmoji: emoji,
+          tenantColor: color,
+        }),
       clearProject: () =>
-        set({ tenantId: null, tenantName: null, tenantEmoji: null }),
+        set({
+          tenantId: null,
+          tenantName: null,
+          tenantEmoji: null,
+          tenantColor: null,
+        }),
     }),
     { name: "heyeugene-project-filter" }
   )

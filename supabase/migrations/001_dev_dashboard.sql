@@ -7,6 +7,7 @@ create table if not exists support_tenants (
   name text not null,
   prefix text not null unique,
   emoji text default '🏢',
+  color text default '#3b82f6',
   hourly_rate numeric(10,2) default 25.00,
   currency text default 'CAD',
   tax_rate numeric(5,4) default 0.05,
@@ -167,12 +168,13 @@ create table if not exists dev_marketing_campaigns (
 );
 
 -- Seed Mike's Place tenant (update UUID as needed)
-insert into support_tenants (id, name, prefix, emoji, hourly_rate, currency, tax_rate, contact_name, contact_email, address, payment_instructions)
+insert into support_tenants (id, name, prefix, emoji, color, hourly_rate, currency, tax_rate, contact_name, contact_email, address, payment_instructions)
 values (
   'a0000000-0000-4000-8000-000000000001',
   'Mike''s Place',
   'MP',
   '🍦',
+  '#f59e0b',
   25.00,
   'CAD',
   0.05,
@@ -182,12 +184,13 @@ values (
   'e-Transfer to eugene@heyeugene.com'
 ) on conflict (prefix) do nothing;
 
-insert into support_tenants (id, name, prefix, emoji, hourly_rate, currency, tax_rate)
+insert into support_tenants (id, name, prefix, emoji, color, hourly_rate, currency, tax_rate)
 values (
   'a0000000-0000-4000-8000-000000000002',
   'COAST',
   'CST',
   '🔩',
+  '#475569',
   35.00,
   'CAD',
   0.05

@@ -25,6 +25,7 @@ const MOCK_TENANTS: Tenant[] = [
     name: "Mike's Place",
     prefix: "MP",
     emoji: "🍦",
+    color: "#f59e0b",
     hourly_rate: 25,
     currency: "CAD",
     tax_rate: 0.05,
@@ -39,6 +40,7 @@ const MOCK_TENANTS: Tenant[] = [
     name: "COAST",
     prefix: "CST",
     emoji: "🔩",
+    color: "#475569",
     hourly_rate: 35,
     currency: "CAD",
     tax_rate: 0.05,
@@ -68,7 +70,10 @@ export async function getTenants(): Promise<Tenant[]> {
     .order("name");
 
   if (error || !data?.length) return MOCK_TENANTS;
-  return data as Tenant[];
+  return (data as Tenant[]).map((t) => ({
+    ...t,
+    color: t.color ?? "#3b82f6",
+  }));
 }
 
 export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
@@ -83,12 +88,12 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
         type: "bug",
         title: "Cart badge not updating",
         description: "The cart icon badge doesn't reflect item count after adding products.",
-        status: "in_progress",
+        status: "done",
         priority: "Need soon",
         ai_estimate_min: 25,
         ai_estimate_max: 50,
         created_by: "Mike Johnson",
-        created_at: subDays(new Date(), 0.1).toISOString(),
+        created_at: subDays(new Date(), 2).toISOString(),
         updated_at: new Date().toISOString(),
       },
       {
@@ -106,12 +111,26 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
         updated_at: new Date().toISOString(),
       },
       {
+        id: "t4",
+        tenant_id: MOCK_TENANTS[0].id,
+        type: "bug",
+        title: "Freezer temp display bug",
+        description: "Temperature reading shows incorrect values on staff dashboard.",
+        status: "new",
+        priority: "Need soon",
+        ai_estimate_min: 25,
+        ai_estimate_max: 50,
+        created_by: "Anna",
+        created_at: subDays(new Date(), 0.2).toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      {
         id: "t3",
         tenant_id: MOCK_TENANTS[1].id,
         type: "feature",
         title: "Export timesheets to PDF",
         description: "Staff need to export weekly timesheets as PDF for payroll.",
-        status: "new",
+        status: "in_progress",
         priority: "When poss.",
         ai_estimate_min: 75,
         ai_estimate_max: 100,
