@@ -35,7 +35,7 @@ export function TicketTable({ tickets }: TicketTableProps) {
             <th className="px-4 py-3">Title</th>
             <th className="px-4 py-3">Status</th>
             <th className="px-4 py-3">Priority</th>
-            <th className="px-4 py-3">AI Est.</th>
+            <th className="px-4 py-3">Estimate</th>
             <th className="px-4 py-3">Created</th>
             <th className="px-4 py-3 w-10" />
           </tr>
@@ -69,9 +69,20 @@ export function TicketTable({ tickets }: TicketTableProps) {
                 {ticket.priority ?? "—"}
               </td>
               <td className="px-4 py-3 font-mono text-xs">
-                {ticket.ai_estimate_min != null && ticket.ai_estimate_max != null
-                  ? `${formatCurrency(ticket.ai_estimate_min)}–${formatCurrency(ticket.ai_estimate_max)}`
-                  : "—"}
+                {ticket.estimated_hours_min != null &&
+                ticket.estimated_hours_max != null ? (
+                  <span>
+                    {ticket.estimated_hours_min}–{ticket.estimated_hours_max}h
+                    {ticket.estimated_cost_min != null ? (
+                      <span className="ml-1 text-[var(--text-secondary)]">
+                        · {formatCurrency(ticket.estimated_cost_min)}–
+                        {formatCurrency(ticket.estimated_cost_max ?? 0)}
+                      </span>
+                    ) : null}
+                  </span>
+                ) : (
+                  <span className="text-amber-600">Needs estimate</span>
+                )}
               </td>
               <td className="px-4 py-3 text-[var(--text-secondary)]">
                 {formatRelative(ticket.created_at)}

@@ -45,7 +45,15 @@ export interface Ticket {
   description: string | null;
   status: TicketStatus;
   priority: string | null;
+  estimated_hours_min: number | null;
+  estimated_hours_max: number | null;
+  estimated_cost_min: number | null;
+  estimated_cost_max: number | null;
+  estimate_reasoning: string | null;
+  estimate_status: string | null;
+  /** @deprecated use estimated_cost_min/max */
   ai_estimate_min: number | null;
+  /** @deprecated use estimated_cost_max */
   ai_estimate_max: number | null;
   created_by: string | null;
   created_at: string;

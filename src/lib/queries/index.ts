@@ -80,6 +80,33 @@ export async function getTenants(): Promise<Tenant[]> {
   }));
 }
 
+function mapTicketRow(row: Record<string, unknown>): Ticket {
+  const costMin = row.estimated_cost_min ?? row.ai_estimate_min;
+  const costMax = row.estimated_cost_max ?? row.ai_estimate_max;
+  return {
+    id: row.id as string,
+    tenant_id: row.tenant_id as string,
+    type: row.type as Ticket["type"],
+    title: row.title as string,
+    description: (row.description as string) ?? null,
+    status: row.status as Ticket["status"],
+    priority: (row.priority as string) ?? null,
+    estimated_hours_min:
+      row.estimated_hours_min != null ? Number(row.estimated_hours_min) : null,
+    estimated_hours_max:
+      row.estimated_hours_max != null ? Number(row.estimated_hours_max) : null,
+    estimated_cost_min: costMin != null ? Number(costMin) : null,
+    estimated_cost_max: costMax != null ? Number(costMax) : null,
+    estimate_reasoning: (row.estimate_reasoning as string) ?? null,
+    estimate_status: (row.estimate_status as string) ?? null,
+    ai_estimate_min: costMin != null ? Number(costMin) : null,
+    ai_estimate_max: costMax != null ? Number(costMax) : null,
+    created_by: (row.created_by as string) ?? null,
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
+  };
+}
+
 export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
   const tenants = await getTenants();
   const supabase = createServiceClient();
@@ -94,6 +121,12 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
         description: "The cart icon badge doesn't reflect item count after adding products.",
         status: "done",
         priority: "Need soon",
+        estimated_hours_min: 0.5,
+        estimated_hours_max: 1,
+        estimated_cost_min: 25,
+        estimated_cost_max: 50,
+        estimate_reasoning: null,
+        estimate_status: null,
         ai_estimate_min: 25,
         ai_estimate_max: 50,
         created_by: "Mike Johnson",
@@ -108,6 +141,12 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
         description: null,
         status: "pending_approval",
         priority: null,
+        estimated_hours_min: 3,
+        estimated_hours_max: 4,
+        estimated_cost_min: 150,
+        estimated_cost_max: 200,
+        estimate_reasoning: null,
+        estimate_status: null,
         ai_estimate_min: 150,
         ai_estimate_max: 200,
         created_by: "Eugene",
@@ -122,6 +161,12 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
         description: "Temperature reading shows incorrect values on staff dashboard.",
         status: "new",
         priority: "Need soon",
+        estimated_hours_min: 0.5,
+        estimated_hours_max: 1,
+        estimated_cost_min: 25,
+        estimated_cost_max: 50,
+        estimate_reasoning: null,
+        estimate_status: null,
         ai_estimate_min: 25,
         ai_estimate_max: 50,
         created_by: "Anna",
@@ -136,6 +181,12 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
         description: "Staff need to export weekly timesheets as PDF for payroll.",
         status: "in_progress",
         priority: "When poss.",
+        estimated_hours_min: 2,
+        estimated_hours_max: 3,
+        estimated_cost_min: 75,
+        estimated_cost_max: 100,
+        estimate_reasoning: null,
+        estimate_status: null,
         ai_estimate_min: 75,
         ai_estimate_max: 100,
         created_by: "Admin",
@@ -158,7 +209,10 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
     console.error("[getTickets]", error.message);
     return [];
   }
-  return attachTenants((data ?? []) as Ticket[], tenants);
+  return attachTenants(
+    (data ?? []).map((row) => mapTicketRow(row as Record<string, unknown>)),
+    tenants
+  );
 }
 
 export async function getTicket(id: string): Promise<Ticket | null> {
@@ -438,20 +492,7 @@ export async function getProposals(): Promise<Proposal[]> {
       attachments: [],
       created_at: row.created_at,
       tenant,
-      ticket: {
-        id: row.id,
-        tenant_id: row.tenant_id,
-        type: "dev_proposal",
-        title: row.title,
-        description: row.description,
-        status: row.status,
-        priority: row.priority,
-        ai_estimate_min: row.estimated_cost_min,
-        ai_estimate_max: row.estimated_cost_max,
-        created_by: row.created_by,
-        created_at: row.created_at,
-        updated_at: row.updated_at,
-      },
+      ticket: mapTicketRow(row as Record<string, unknown>),
     } as Proposal;
   });
 }
