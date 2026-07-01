@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HeyEugene — Developer Dashboard
 
-## Getting Started
+Personal CRM command center for managing all client projects. Connects to the shared Supabase database used by client apps (Mike's Place, COAST, etc.) via `support_*` tables.
 
-First, run the development server:
+## Stack
+
+- **Next.js 15** (App Router) + TypeScript + Tailwind CSS
+- **Supabase** (shared DB, service role for cross-tenant access)
+- **Anthropic Claude** (AI assistant)
+- **Recharts** (analytics charts)
+- **Zustand** (timer + project filter state)
+- **Sonner** (toast notifications)
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env.local
+# Fill in Supabase + Anthropic keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the migration against your shared Supabase project:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# supabase/migrations/001_dev_dashboard.sql
+```
 
-## Learn More
+This creates `dev_time_entries`, `dev_proposals`, `dev_ai_usage`, `dev_marketing_*` tables plus seed tenants for Mike's Place and COAST.
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Configured for **Cloudflare Pages**. Set environment variables in the Cloudflare dashboard.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
+| Page | Route | Status |
+|------|-------|--------|
+| Dashboard | `/` | ✅ Stats, attention items, activity, weekly chart |
+| Tickets | `/tickets` | ✅ List, filters, detail with workflow |
+| Invoices | `/invoices` | ✅ List, builder, detail |
+| Proposals | `/proposals` | ✅ Editor with client preview |
+| Time Log | `/time` | ✅ Grouped entries, timer API |
+| AI Assistant | `/ai` | ✅ Chat with context + token tracking |
+| AI Usage | `/ai-usage` | ✅ Charts + detail table |
+| Marketing | `/marketing/*` | ✅ Contacts + campaigns UI |
+| Settings | `/settings` | ✅ Tenant config view |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Without Supabase env vars, the app runs with mock data for development.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Repo
+
+https://github.com/Mikes2026/HeyEugene
