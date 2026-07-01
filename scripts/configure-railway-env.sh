@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Sync Supabase env from mikesplace-dev into Railway HeyEugene service.
-# Requires: railway login + railway link (HeyEugene project)
+# Requires: railway login
 set -euo pipefail
 
 SOURCE="${1:-$HOME/Projects/mikesplace-dev/crm/.env.local}"
+PROJECT_ID="${RAILWAY_PROJECT_ID:-22508b01-db13-40ac-b5cb-419d747f5c1d}"
+ENVIRONMENT_ID="${RAILWAY_ENVIRONMENT_ID:-67110e84-b74b-43fb-a03a-0597e5c25371}"
 SERVICE="${RAILWAY_SERVICE:-}"
 
 if ! command -v railway >/dev/null; then
@@ -34,7 +36,7 @@ for key in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVI
   fi
 done
 
-ARGS=()
+ARGS=(--project "$PROJECT_ID" --environment "$ENVIRONMENT_ID")
 if [[ -n "$SERVICE" ]]; then
   ARGS+=(--service "$SERVICE")
 fi
