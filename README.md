@@ -30,9 +30,27 @@ Run the migration against your shared Supabase project:
 
 This creates `dev_time_entries`, `dev_proposals`, `dev_ai_usage`, `dev_marketing_*` tables plus seed tenants for Mike's Place and COAST.
 
-## Deployment
+## Deployment (Railway)
 
-Configured for **Cloudflare Pages**. Set environment variables in the Cloudflare dashboard.
+**Production:** https://heyeugene-production.up.railway.app
+
+Connected to [Railway](https://railway.app) from `EugeneFoster/HeyEugene`. Set these variables in the Railway service:
+
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Shared Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Public anon key (realtime in browser) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-side queries across all tenants |
+| `ANTHROPIC_API_KEY` | For AI | AI Assistant + token tracking |
+
+Without Supabase vars the app still boots with mock data. After changing variables, redeploy the service.
+
+```bash
+# Local Railway CLI (optional)
+railway login
+railway link
+railway up --detach -m "deploy"
+```
 
 ## Features
 
