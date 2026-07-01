@@ -64,6 +64,8 @@ export function getGreeting(): string {
 
 export function ticketTypeLabel(type: string): string {
   const labels: Record<string, string> = {
+    bug_report: "Bug",
+    feature_request: "Feature",
     bug: "Bug",
     feature: "Feature",
     dev_proposal: "Proposal",
@@ -75,6 +77,8 @@ export function ticketTypeLabel(type: string): string {
 
 export function ticketTypeEmoji(type: string): string {
   const emojis: Record<string, string> = {
+    bug_report: "🐛",
+    feature_request: "⭐",
     bug: "🐛",
     feature: "⭐",
     dev_proposal: "💡",

@@ -69,7 +69,11 @@ export async function getTenants(): Promise<Tenant[]> {
     .select("*")
     .order("name");
 
-  if (error || !data?.length) return MOCK_TENANTS;
+  if (error) {
+    console.error("[getTenants]", error.message);
+    return [];
+  }
+  if (!data?.length) return [];
   return (data as Tenant[]).map((t) => ({
     ...t,
     color: t.color ?? "#3b82f6",
@@ -149,7 +153,11 @@ export async function getTickets(tenantId?: string | null): Promise<Ticket[]> {
 
   if (tenantId) query = query.eq("tenant_id", tenantId);
 
-  const { data } = await query;
+  const { data, error } = await query;
+  if (error) {
+    console.error("[getTickets]", error.message);
+    return [];
+  }
   return attachTenants((data ?? []) as Ticket[], tenants);
 }
 

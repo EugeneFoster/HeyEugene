@@ -8,9 +8,11 @@ export type TicketStatus =
   | "declined";
 
 export type TicketType =
+  | "bug_report"
+  | "feature_request"
+  | "dev_proposal"
   | "bug"
   | "feature"
-  | "dev_proposal"
   | "question"
   | "other";
 
