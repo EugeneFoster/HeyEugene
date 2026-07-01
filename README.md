@@ -52,4 +52,4 @@ Without Supabase env vars, the app runs with mock data for development.
 
 ## Repo
 
-https://github.com/Mikes2026/HeyEugene
+https://github.com/EugeneFoster/HeyEugene
