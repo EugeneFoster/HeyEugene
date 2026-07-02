@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import type { NextResponse } from "next/server";
 import { SESSION_COOKIE, SESSION_MAX_AGE } from "./constants";
-import { sessionSecret } from "./login";
+import { sessionSecret } from "./config";
 
 export type HeyEugeneSession = {
   email: string;

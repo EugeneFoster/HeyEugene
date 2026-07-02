@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 import { SESSION_COOKIE } from "@/lib/auth/constants";
-import { authConfigured, sessionSecret } from "@/lib/auth/login";
+import { authConfigured, sessionSecret } from "@/lib/auth/config";
 
 const PUBLIC_PREFIXES = ["/login", "/api/auth", "/api/status"];
 

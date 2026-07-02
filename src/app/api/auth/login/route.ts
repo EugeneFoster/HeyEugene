@@ -3,7 +3,10 @@ import {
   applySessionCookie,
   createSessionToken,
 } from "@/lib/auth/session.server";
-import { authConfigured, verifyAdminLogin } from "@/lib/auth/login";
+import { authConfigured } from "@/lib/auth/config";
+import { verifyAdminLogin } from "@/lib/auth/login";
+
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   if (!authConfigured()) {
