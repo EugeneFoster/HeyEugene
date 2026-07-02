@@ -1,13 +1,6 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { RealtimeProvider } from "@/components/shared/RealtimeProvider";
-import { ConnectionBanner } from "@/components/shared/ConnectionBanner";
-import {
-  getTenants,
-  getDashboardStats,
-} from "@/lib/queries";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,31 +18,16 @@ export const metadata = {
   description: "Personal CRM for managing client projects",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [tenants, stats] = await Promise.all([
-    getTenants(),
-    getDashboardStats(),
-  ]);
-
   return (
     <html lang="en" className={`${inter.variable} ${jetbrains.variable} h-full`}>
       <body className="min-h-full antialiased">
-        <RealtimeProvider>
-          <Sidebar
-            tenants={tenants}
-            newTicketCount={stats.newTickets}
-            unpaidInvoiceCount={stats.unpaidInvoices}
-          />
-          <main className="ml-60 min-h-screen">
-            <ConnectionBanner />
-            {children}
-          </main>
-          <Toaster position="bottom-right" richColors />
-        </RealtimeProvider>
+        {children}
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

@@ -126,6 +126,16 @@ export function SidebarNav({
             </li>
           ))}
         </ul>
+        <button
+          type="button"
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            window.location.href = "/login";
+          }}
+          className="mt-4 w-full rounded-lg px-3 py-2 text-left text-sm text-gray-400 hover:bg-white/5 hover:text-white"
+        >
+          Sign out
+        </button>
       </div>
     </nav>
   );
